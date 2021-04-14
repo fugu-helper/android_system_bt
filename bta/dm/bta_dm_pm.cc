@@ -47,7 +47,6 @@ static void bta_dm_pm_btm_cback(const RawAddress& bd_addr,
 static bool bta_dm_pm_park(const RawAddress& peer_addr);
 static bool bta_dm_pm_sniff(tBTA_DM_PEER_DEVICE* p_peer_dev, uint8_t index);
 static bool bta_dm_pm_is_sco_active();
-static int bta_dm_get_sco_index();
 static void bta_dm_pm_hid_check(bool bScoActive);
 static void bta_dm_pm_set_sniff_policy(tBTA_DM_PEER_DEVICE* p_dev,
                                        bool bDisable);
@@ -61,6 +60,7 @@ static void bta_dm_pm_stop_timer_by_index(tBTA_PM_TIMER* p_timer,
  * can use it */
 #define BTA_DM_PM_SSR_HH BTA_DM_PM_SSR1
 #endif
+static int bta_dm_get_sco_index();
 static void bta_dm_pm_ssr(const RawAddress& peer_addr);
 #endif
 
@@ -331,11 +331,11 @@ static void bta_dm_pm_stop_timer_by_index(tBTA_PM_TIMER* p_timer,
 static void bta_dm_pm_cback(tBTA_SYS_CONN_STATUS status, uint8_t id,
                             uint8_t app_id, const RawAddress& peer_addr) {
   uint8_t i, j;
-  uint8_t* p = NULL;
   tBTA_DM_PEER_DEVICE* p_dev;
   tBTA_DM_PM_REQ pm_req = BTA_DM_PM_NEW_REQ;
 
 #if (BTM_SSR_INCLUDED == TRUE)
+  uint8_t* p = NULL;
   int index = BTA_DM_PM_SSR0;
 #endif
 
@@ -696,8 +696,8 @@ static bool bta_dm_pm_sniff(tBTA_DM_PEER_DEVICE* p_peer_dev, uint8_t index) {
 #endif
 
   BTM_ReadPowerMode(p_peer_dev->peer_bdaddr, &mode);
-  p_rem_feat = BTM_ReadRemoteFeatures(p_peer_dev->peer_bdaddr);
 #if (BTM_SSR_INCLUDED == TRUE)
+  p_rem_feat = BTM_ReadRemoteFeatures(p_peer_dev->peer_bdaddr);
   APPL_TRACE_DEBUG("bta_dm_pm_sniff cur:%d, idx:%d, info:x%x", mode, index,
                    p_peer_dev->info);
   if (mode != BTM_PM_MD_SNIFF ||
@@ -1075,6 +1075,7 @@ static bool bta_dm_pm_is_sco_active() {
   return bScoActive;
 }
 
+#if (BTM_SSR_INCLUDED == TRUE)
 /*******************************************************************************
  *
  * Function        bta_dm_get_sco_index
@@ -1094,7 +1095,7 @@ static int bta_dm_get_sco_index() {
   }
   return -1;
 }
-
+#endif // BTM_SSR_INCLUDED
 /*******************************************************************************
  *
  * Function         bta_dm_pm_hid_check
